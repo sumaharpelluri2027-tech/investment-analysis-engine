@@ -1,0 +1,6 @@
+{
+  "name": "BoardIQ",
+  "description": "AI Decision Intelligence platform for investors delivering automated due diligence, dataset validation, explainable AI reasoning, executive dashboards, and exportable investment memos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
