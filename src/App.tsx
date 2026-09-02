@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FlowStep, UserProfile, UploadedDataset } from './types';
 import { LandingView } from './views/LandingView';
 import { LoginView } from './views/LoginView';
@@ -12,7 +12,19 @@ import { ExecutiveDashboardView } from './views/ExecutiveDashboardView';
 import { ExplainableAIView } from './views/ExplainableAIView';
 import { ExportMemoView } from './views/ExportMemoView';
 import { SectorAnalysisView } from './views/SectorAnalysisView';
+import { WatchlistView } from './views/WatchlistView';
 import { generateInstitutionalSampleDataset } from './utils/datasetManager';
+
+const WATCHLIST_STORAGE_KEY = 'boardiq_watchlist';
+
+function loadWatchlist(): string[] {
+  try {
+    const stored = localStorage.getItem(WATCHLIST_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function App() {
   const [currentStep, setCurrentStep] = useState<FlowStep>('landing');
@@ -28,6 +40,20 @@ export default function App() {
   const [selectedObjectiveId, setSelectedObjectiveId] = useState<string>('investment_screening');
   const [selectedObjectiveTitle, setSelectedObjectiveTitle] = useState<string>('Investment Screening');
   const [uploadedFile, setUploadedFile] = useState<UploadedDataset | null>(() => generateInstitutionalSampleDataset());
+
+  const [watchlistIds, setWatchlistIds] = useState<string[]>(() => loadWatchlist());
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlistIds));
+    } catch { /* quota exceeded — ignore */ }
+  }, [watchlistIds]);
+
+  const toggleWatchlist = useCallback((id: string) => {
+    setWatchlistIds((prev) =>
+      prev.includes(id) ? prev.filter((wid) => wid !== id) : [...prev, id]
+    );
+  }, []);
 
   const handleLoginSuccess = (profileData?: Partial<UserProfile>) => {
     if (profileData) {
@@ -143,6 +169,20 @@ export default function App() {
 
       {currentStep === 'sector_analysis' && (
         <SectorAnalysisView
+          onSelectCompany={(companyName) => {
+            setSelectedObjectiveTitle(`Analysis: ${companyName}`);
+            setCurrentStep('executive_dashboard');
+          }}
+          onNavigate={(step) => setCurrentStep(step)}
+          watchlistIds={watchlistIds}
+          onToggleWatchlist={toggleWatchlist}
+        />
+      )}
+
+      {currentStep === 'watchlist' && (
+        <WatchlistView
+          watchlistIds={watchlistIds}
+          onToggleWatchlist={toggleWatchlist}
           onSelectCompany={(companyName) => {
             setSelectedObjectiveTitle(`Analysis: ${companyName}`);
             setCurrentStep('executive_dashboard');

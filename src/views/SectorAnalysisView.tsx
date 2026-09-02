@@ -6,6 +6,8 @@ import { TopNav } from '../components/TopNav';
 interface SectorAnalysisViewProps {
   onSelectCompany: (companyName: string) => void;
   onNavigate: (step: FlowStep) => void;
+  watchlistIds: string[];
+  onToggleWatchlist: (id: string) => void;
 }
 
 export interface DetailedCompany {
@@ -25,7 +27,7 @@ export interface DetailedCompany {
   highlight: string;
 }
 
-const SAMPLE_COMPANIES: DetailedCompany[] = [
+export const SAMPLE_COMPANIES: DetailedCompany[] = [
   {
     id: 'ntg',
     name: 'Nexus Technologies Group',
@@ -127,6 +129,8 @@ const SAMPLE_COMPANIES: DetailedCompany[] = [
 export const SectorAnalysisView: React.FC<SectorAnalysisViewProps> = ({
   onSelectCompany,
   onNavigate,
+  watchlistIds,
+  onToggleWatchlist,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'BUY' | 'HOLD' | 'WATCH'>('ALL');
@@ -159,7 +163,7 @@ export const SectorAnalysisView: React.FC<SectorAnalysisViewProps> = ({
 
   return (
     <div className="flex h-screen overflow-hidden antialiased font-body-md text-body-md bg-[#121414] text-[#e2e2e2]">
-      <SideNav currentStep="sector_analysis" onNavigate={onNavigate} />
+      <SideNav currentStep="sector_analysis" onNavigate={onNavigate} watchlistCount={watchlistIds.length} />
       <TopNav
         currentStep="sector_analysis"
         onNavigate={onNavigate}
@@ -263,6 +267,7 @@ export const SectorAnalysisView: React.FC<SectorAnalysisViewProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
               {filteredCompanies.map((company) => {
                 const isSelected = selectedForCompare.includes(company.id);
+                const isWatchlisted = watchlistIds.includes(company.id);
                 return (
                   <div
                     key={company.id}
@@ -294,17 +299,41 @@ export const SectorAnalysisView: React.FC<SectorAnalysisViewProps> = ({
                           </span>
                         </div>
 
-                        <span
-                          className={`font-[#Geist] text-[10px] font-bold px-2.5 py-0.5 rounded uppercase ${
-                            company.recommendation === 'STRONG BUY' || company.recommendation === 'BUY'
-                              ? 'bg-[#4edea3]/10 text-[#4edea3] border border-[#4edea3]/20'
-                              : company.recommendation === 'HOLD'
-                              ? 'bg-[#FBBC05]/10 text-[#FBBC05] border border-[#FBBC05]/20'
-                              : 'bg-[#ffb4ab]/10 text-[#ffb4ab] border border-[#ffb4ab]/20'
-                          }`}
-                        >
-                          {company.recommendation}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {/* Bookmark / Watchlist Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleWatchlist(company.id);
+                            }}
+                            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                              isWatchlisted
+                                ? 'bg-[#4edea3]/15 border border-[#4edea3]/30 text-[#4edea3]'
+                                : 'bg-[#0b0e14] border border-[#45474b] text-[#909095] hover:border-[#4edea3] hover:text-[#4edea3]'
+                            }`}
+                            title={isWatchlisted ? 'Remove from watchlist' : 'Add to watchlist'}
+                          >
+                            <span
+                              className="material-symbols-outlined text-sm"
+                              style={{ fontVariationSettings: isWatchlisted ? "'FILL' 1" : "'FILL' 0" }}
+                            >
+                              bookmark
+                            </span>
+                          </button>
+
+                          <span
+                            className={`font-[#Geist] text-[10px] font-bold px-2.5 py-0.5 rounded uppercase ${
+                              company.recommendation === 'STRONG BUY' || company.recommendation === 'BUY'
+                                ? 'bg-[#4edea3]/10 text-[#4edea3] border border-[#4edea3]/20'
+                                : company.recommendation === 'HOLD'
+                                ? 'bg-[#FBBC05]/10 text-[#FBBC05] border border-[#FBBC05]/20'
+                                : 'bg-[#ffb4ab]/10 text-[#ffb4ab] border border-[#ffb4ab]/20'
+                            }`}
+                          >
+                            {company.recommendation}
+                          </span>
+                        </div>
                       </div>
 
                       <h3 className="font-[#Hanken Grotesk] font-bold text-lg text-[#e2e2e2] group-hover:text-[#4edea3] transition-colors mb-1">

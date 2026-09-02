@@ -4,9 +4,10 @@ import { FlowStep } from '../types';
 interface SideNavProps {
   currentStep: FlowStep;
   onNavigate: (step: FlowStep) => void;
+  watchlistCount?: number;
 }
 
-export const SideNav: React.FC<SideNavProps> = ({ currentStep, onNavigate }) => {
+export const SideNav: React.FC<SideNavProps> = ({ currentStep, onNavigate, watchlistCount = 0 }) => {
   const isDashboardActive = [
     'decision_objective',
     'dataset_requirement',
@@ -18,6 +19,7 @@ export const SideNav: React.FC<SideNavProps> = ({ currentStep, onNavigate }) => 
   const isAnalysesActive = currentStep === 'explainable_ai';
   const isReportsActive = currentStep === 'export_memo';
   const isCompaniesActive = currentStep === 'sector_analysis';
+  const isWatchlistActive = currentStep === 'watchlist';
 
   return (
     <nav className="hidden md:flex flex-col h-full py-stack-lg bg-[#0c0f0f] border-r border-[#45474b] fixed left-0 top-0 w-64 z-40 transition-all duration-200 ease-in-out">
@@ -78,11 +80,25 @@ export const SideNav: React.FC<SideNavProps> = ({ currentStep, onNavigate }) => 
         </li>
         <li>
           <button
-            onClick={() => onNavigate('executive_dashboard')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#c6c6cb] hover:bg-[#282a2b] hover:text-[#e2e2e2] transition-all duration-200 text-left"
+            onClick={() => onNavigate('watchlist')}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-left ${
+              isWatchlistActive
+                ? 'text-[#c4c6cf] font-bold border-r-2 border-[#c4c6cf] bg-[#282a2b]/50'
+                : 'text-[#c6c6cb] hover:bg-[#282a2b] hover:text-[#e2e2e2]'
+            }`}
           >
-            <span className="material-symbols-outlined">visibility</span>
-            <span className="font-body-md">Watchlist</span>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontVariationSettings: isWatchlistActive ? "'FILL' 1" : "'FILL' 0" }}
+            >
+              bookmark
+            </span>
+            <span className="font-body-md flex-1 text-left">Watchlist</span>
+            {watchlistCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-[#4edea3]/15 text-[#4edea3] font-[#Geist] text-[10px] font-bold border border-[#4edea3]/20">
+                {watchlistCount}
+              </span>
+            )}
           </button>
         </li>
         <li>

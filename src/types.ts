@@ -10,7 +10,8 @@ export type FlowStep =
   | 'executive_dashboard'
   | 'explainable_ai'
   | 'export_memo'
-  | 'sector_analysis';
+  | 'sector_analysis'
+  | 'watchlist';
 
 export interface UserProfile {
   fullName: string;
